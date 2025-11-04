@@ -33,7 +33,8 @@ mats = openmc.Materials([fuel, water, wapor, carbon, air])
 mats.export_to_xml()
 
 s1 = openmc.Sphere(r=10., boundary_type='vacuum')
-s2 = openmc.Sphere(r=1.0001)
+s20 = openmc.Sphere(r=1.01)
+s21 = openmc.Sphere(r=1.0101)
 s3 = openmc.Sphere(r=1.)
 s4 = openmc.Sphere(r=.1)            # sphere in the center
 s5 = openmc.Sphere(x0=0.2, r=.01)   # smaller sphere near the center
@@ -44,8 +45,9 @@ vol = (
     4 * pi / 3 * pow(s5.r,3),
     4 * pi / 3 * pow(s4.r,3),
     4 * pi / 3 * (pow(s3.r,3) - pow(s4.r,3) - pow(s5.r,3)),
-    4 * pi / 3 * (pow(s2.r,3) - pow(s3.r,3)),
-    4 * pi / 3 * (pow(s1.r,3) - pow(s2.r,3) - pow(s6.r,3)),
+    4 * pi / 3 * (pow(s20.r,3) - pow(s3.r,3)),
+    4 * pi / 3 * (pow(s21.r,3) - pow(s20.r,3)),
+    4 * pi / 3 * (pow(s1.r,3) - pow(s21.r,3) - pow(s6.r,3)),
     4 * pi / 3 * (pow(s6.r,3)))
 
 carb_sphere   = openmc.Cell(1, fill=carbon, region=-s5, 
@@ -54,25 +56,28 @@ carb_sphere   = openmc.Cell(1, fill=carbon, region=-s5,
 carb_lsphere  = openmc.Cell(2, fill=carbon, region=-s4,                             
                             name = "{:10.4e}".format(vol[1]) + ' | '
                             'R < 0.1 cm sphere in the center')
-inner_sphere  = openmc.Cell(3, fill=fuel,   region=+s4 & -s3 & +s5,                             
+inner_sphere  = openmc.Cell(3, fill=fuel,   region=+s4 & -s3 & +s5,
                             name = "{:10.4e}".format(vol[2]) + ' | '
                             '0.1 < R < 1. cm layer - sm.sph.')
-gap_layer     = openmc.Cell(4, fill=air,    region=+s3 & -s2,                             
+gap_layer1    = openmc.Cell(4, fill=air,    region=+s3 & -s20,
                             name = "{:10.4e}".format(vol[3]) + ' | '
-                            '1.0 < R < 1.0001 cm layer')
-outer_sphere  = openmc.Cell(5, fill=water,  region=+s2 & +s6 & -s1,                             
+                            '1. < R < 1.01 cm layer')
+gap_layer2    = openmc.Cell(5, fill=air,    region=+s20 & -s21,
                             name = "{:10.4e}".format(vol[4]) + ' | '
-                            '1.0001 < R < 10 cm layer')
-bubble_sphere = openmc.Cell(6, fill=wapor,  region=-s6,                             
+                            '1.01 < R < 1.0101 cm layer')
+outer_sphere  = openmc.Cell(6, fill=water,  region=+s21 & +s6 & -s1,
                             name = "{:10.4e}".format(vol[5]) + ' | '
+                            '1.0101 < R < 10 cm layer')
+bubble_sphere = openmc.Cell(7, fill=wapor,  region=-s6,
+                            name = "{:10.4e}".format(vol[6]) + ' | '
                             'R < 0.1 cm sphere on periphery')
 
-cells_list = (carb_sphere, carb_lsphere, inner_sphere, gap_layer, 
-              outer_sphere, bubble_sphere)
+cells_list = (carb_sphere, carb_lsphere, inner_sphere, gap_layer1, 
+              gap_layer2, outer_sphere, bubble_sphere)
 
 root = openmc.Universe(0, cells=(
-    carb_sphere, carb_lsphere, inner_sphere, gap_layer, outer_sphere, 
-    bubble_sphere))
+    carb_sphere, carb_lsphere, inner_sphere, gap_layer1, gap_layer2, 
+    outer_sphere, bubble_sphere))
 
 geom = openmc.Geometry(root)
 geom.export_to_xml()
