@@ -87,7 +87,7 @@ cell_vol = openmc.VolumeCalculation(
     cells_list, 100000000, lower_left, upper_right
     )
 cell_vol_rt = openmc.VolumeCalculation(
-    cells_list, 30000000, lower_left, upper_right, 'ray'
+    cells_list, 40000000, lower_left, upper_right, 'ray'
     )
 mat_vol = openmc.VolumeCalculation(
     [fuel, water, wapor, carbon, air],
@@ -95,13 +95,13 @@ mat_vol = openmc.VolumeCalculation(
     )
 mat_vol_rt = openmc.VolumeCalculation(
     [fuel, water, wapor, carbon, air],
-    30000000, lower_left, upper_right, 'ray'
+    40000000, lower_left, upper_right, 'ray'
     )
 univ_vol = openmc.VolumeCalculation(
     [root], 100000000, lower_left, upper_right
     )
 univ_vol_rt = openmc.VolumeCalculation(
-    [root], 30000000, lower_left, upper_right, 'ray'
+    [root], 40000000, lower_left, upper_right, 'ray'
     )
 
 settings = openmc.Settings()
